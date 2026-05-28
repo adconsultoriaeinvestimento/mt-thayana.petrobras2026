@@ -148,7 +148,8 @@ function init(){
   if(name){document.getElementById('studentName').value=name;document.getElementById('loginStatus').textContent=`Logada como ${name}`;}
   updateChart();
 }
-function saveStudent(){const n=document.getElementById('studentName').value.trim();if(!n)return alert('Digite seu nome.');localStorage.setItem('studentName',n);document.getElementById('loginStatus').textContent=`Logada como ${n}`;}
+function saveStudent(){const n=document.getElementById('studentName').value.trim();if(!n)return alert('Digite seu nome.');
+                       localStorage.setItem('studentName',n);document.getElementById('loginStatus').textContent=`Logada como ${n}`;}
 function startQuiz(){
   const subj=document.getElementById('quizSubject').value;
   const amount=Number(document.getElementById('quizAmount').value);
@@ -159,7 +160,8 @@ function startQuiz(){
   renderQuestion();
 }
 function renderQuestion(){
-  if(!currentQuiz.length){document.getElementById('quizArea').innerHTML='<p>Escolha a disciplina e clique em Gerar Simulado.</p>';document.getElementById('questionCounter').textContent='Questão 0 de 0';return;}
+  if(!currentQuiz.length){document.getElementById('quizArea').innerHTML='<p>Escolha a disciplina e clique em Gerar Simulado.</p>';
+                          document.getElementById('questionCounter').textContent='Questão 0 de 0';return;}
   const q=currentQuiz[currentIndex];
   document.getElementById('questionCounter').textContent=`Questão ${currentIndex+1} de ${currentQuiz.length}`;
   document.getElementById('quizArea').innerHTML=`<div class="question"><strong>${currentIndex+1}. ${q.s}</strong><p>${q.q}</p>${q.o.map((op,j)=>`<label class="option"><input type="radio" name="currentQuestion" value="${j}" ${answers[currentIndex]===j?'checked':''}> ${String.fromCharCode(65+j)}) ${op}</label>`).join('')}</div>`;
@@ -176,8 +178,24 @@ function finishQuiz(){
   lastResult={date:new Date().toLocaleString('pt-BR'),name:localStorage.getItem('studentName')||'Thayana',subject:subj,correct,total,percent};
   document.getElementById('scorePercent').textContent=percent+'%';document.getElementById('scoreText').textContent=`${correct}/${total}`;document.getElementById('lastSubject').textContent=subj;document.getElementById('answerKey').innerHTML=key;location.href='#dashboard';
 }
-function saveResultLocal(){if(!lastResult)return alert('Finalize um simulado primeiro.');const results=JSON.parse(localStorage.getItem('results')||'[]');results.push(lastResult);localStorage.setItem('results',JSON.stringify(results));updateChart();alert('Resultado salvo no navegador.');}
-async function sendToGoogleSheets(){if(!lastResult)return alert('Finalize um simulado primeiro.');if(!GOOGLE_SCRIPT_URL)return alert('Configure a URL do Apps Script no arquivo script.js.');try{await fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastResult)});saveResultLocal();alert('Resultado enviado para a planilha.');}catch(e){alert('Não foi possível enviar. Verifique a URL do Apps Script.');}}
-function exportCSV(){const results=JSON.parse(localStorage.getItem('results')||'[]');if(!results.length)return alert('Nenhum resultado salvo.');const rows=[['Data','Nome','Disciplina','Acertos','Total','Percentual'],...results.map(r=>[r.date,r.name,r.subject,r.correct,r.total,r.percent])];const csv=rows.map(r=>r.join(';')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resultados-metodo-thayana.csv';a.click();}
-function updateChart(){const results=JSON.parse(localStorage.getItem('results')||'[]');const labels=results.map(r=>r.date);const data=results.map(r=>r.percent);const ctx=document.getElementById('performanceChart');if(chart)chart.destroy();chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Acertividade %',data,tension:.35}]},options:{plugins:{legend:{labels:{color:'#f4fff4'}}},scales:{x:{ticks:{color:'#b6c9b6'}},y:{ticks:{color:'#b6c9b6'},beginAtZero:true,max:100}}}});}
+function saveResultLocal(){if(!lastResult)return alert('Finalize um simulado primeiro.');
+const results=JSON.parse(localStorage.getItem('results')||'[]');results.push(lastResult);
+                           localStorage.setItem('results',JSON.stringify(results));
+                           updateChart();alert('Resultado salvo no navegador.');}
+async function sendToGoogleSheets(){if(!lastResult)return alert('Finalize um simulado primeiro.');
+                                    if(!GOOGLE_SCRIPT_URL)return alert('Configure a URL do Apps Script no arquivo script.js.');
+                                    try{await fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastResult)});
+                                        saveResultLocal();alert('Resultado enviado para a planilha.');
+                                       }catch(e){alert('Não foi possível enviar. Verifique a URL do Apps Script.');
+                                                }}
+function exportCSV(){const results=JSON.parse(localStorage.getItem('results')||'[]');
+                     if(!results.length)return alert('Nenhum resultado salvo.');
+                     const rows=[['Data','Nome','Disciplina','Acertos','Total','Percentual'],...results.map(r=>[r.date,r.name,r.subject,r.correct,r.total,r.percent])];
+                     const csv=rows.map(r=>r.join(';')).join('\n');
+                     const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+                     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resultados-metodo-thayana.csv';a.click();}
+function updateChart(){const results=JSON.parse(localStorage.getItem('results')||'[]');
+                       const labels=results.map(r=>r.date);const data=results.map(r=>r.percent);
+                       const ctx=document.getElementById('performanceChart');
+                       if(chart)chart.destroy();chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Acertividade %',data,tension:.35}]},options:{plugins:{legend:{labels:{color:'#f4fff4'}}},scales:{x:{ticks:{color:'#b6c9b6'}},y:{ticks:{color:'#b6c9b6'},beginAtZero:true,max:100}}}});}
 init();
