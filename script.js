@@ -1,6 +1,7 @@
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
 
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4IGYQNK6TjXkDtg7fWh-W6ifECEDHVU6eLYVT7IXkb6Mp83qizvoZosrdQCv0WJp9/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrYfXv_IhDTqqS_wdEDmF0Aekk_NsZC8Fegv2PzOI0eiByXGFygBHcE1S84KEIWZfc/exec';
+
 
 
 
