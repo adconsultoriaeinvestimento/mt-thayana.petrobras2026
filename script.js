@@ -1,6 +1,6 @@
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
-const GOOGLE_SCRIPT_URL = '';
-const GOOGLE_SHEET_LINK = 'https://script.google.com/macros/s/AKfycbw3ZnmhyJnMjwKezh_gtfGsp2iOlxlCrDP5MbLPiSIObR81dtso-fs6_jjlB3S4YvwJ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3ZnmhyJnMjwKezh_gtfGsp2iOlxlCrDP5MbLPiSIObR81dtso-fs6_jjlB3S4YvwJ/exec';
+const GOOGLE_SHEET_LINK = 'https://script.google.com/macros/library/d/11HhShRFgiLSRlLci01aCbVyaVN-2tkNxGXzNWMxtHsdwVy58Q0uw8Hm-/2';
 
 
 const subjects = [
