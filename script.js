@@ -1,9 +1,8 @@
+ NOVA:
+
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
 const GOOGLE_SHEET_LINK = 'https://docs.google.com/spreadsheets/d/1GbX2BC9KPjI2hVt-3ZxPMOB7aSADXX8gJ7NA5rniD-U/edit?usp=sharing';
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrYfXv_IhDTqqS_wdEDmF0Aekk_NsZC8Fegv2PzOI0eiByXGFygBHcE1S84KEIWZfc/exec';
-
-
-
 
 const subjects = [
   {name:'Português Cesgranrio',topics:['Interpretação de texto','Concordância verbal e nominal','Crase','Pontuação','Regência verbal e nominal','Verbos','Coesão e coerência','Reescrita de frases'],links:[['Português Cesgranrio Petrobras','https://www.youtube.com/results?search_query=portugues+cesgranrio+petrobras'],['Questões Cesgranrio','https://www.qconcursos.com/questoes-de-concursos/bancas/cesgranrio']]},
@@ -115,70 +114,439 @@ const templates = {
 ]
 };
 
-function buildQuestionBank(){
-  const bank=[];
-  Object.keys(templates).forEach(subject=>{
-    for(let i=0;i<50;i++){
-      const t=templates[subject][i%templates[subject].length];
-      bank.push({s:subject,q:`${t[0]} ${i>=10?'(variação '+(i+1)+')':''}`.trim(),o:t[1],a:t[2]});
+
+function buildQuestionBank() {
+  const bank = [];
+
+  Object.keys(templates).forEach(subject => {
+    for (let i = 0; i < 50; i++) {
+      const t = templates[subject][i % templates[subject].length];
+
+      bank.push({
+        s: subject,
+        q: `${t[0]} ${i >= 10 ? 'variação ' + (i + 1) : ''}`.trim(),
+        o: t[1],
+        a: t[2]
+      });
     }
   });
+
   return bank;
 }
+
 const questionBank = buildQuestionBank();
 
 const schedule = [
-  ['Segunda','Português','Teoria: interpretação, crase e concordância','Questões Cesgranrio'],
-  ['Terça','Redes','TCP/IP, DNS, DHCP e VLAN','Exercícios de troubleshooting'],
-  ['Quarta','Linux + Segurança','Comandos, permissões e SSH','Firewall, VPN e backup'],
-  ['Quinta','Suporte + Informática','ITIL, SLA, chamados e AD','Windows, Office 365 e Cloud'],
-  ['Sexta','SQL + Revisão','SELECT, WHERE, JOIN','Correção de erros da semana'],
-  ['Sábado','Simulado','50 questões por disciplina','Correção com gabarito'],
-  ['Domingo','Revisão leve','Flashcards e resumo','Planejamento da próxima semana']
+  ['Segunda', 'Português', 'Teoria: interpretação, crase e concordância', 'Questões Cesgranrio'],
+  ['Terça', 'Redes', 'TCP/IP, DNS, DHCP e VLAN', 'Exercícios de troubleshooting'],
+  ['Quarta', 'Linux + Segurança', 'Comandos, permissões e SSH', 'Firewall, VPN e backup'],
+  ['Quinta', 'Suporte + Informática', 'ITIL, SLA, chamados e AD', 'Windows, Office 365 e Cloud'],
+  ['Sexta', 'SQL + Revisão', 'SELECT, WHERE, JOIN', 'Correção de erros da semana'],
+  ['Sábado', 'Simulado', '50 questões por disciplina', 'Correção com gabarito'],
+  ['Domingo', 'Revisão leve', 'Flashcards e resumo', 'Planejamento da próxima semana']
 ];
-let currentQuiz=[], currentIndex=0, answers={}, lastResult=null, chart;
 
-function init(){
-  document.getElementById('subjectsGrid').innerHTML = subjects.map(s=>{
-    const count = questionBank.filter(q=>q.s===s.name).length;
-    return `<article class="card"><div class="card-top"><h3>${s.name}</h3><span class="badge">${count} questões</span></div><ul>${s.topics.map(t=>`<li>${t}</li>`).join('')}</ul>${s.links.map(l=>`<a class="resource" target="_blank" href="${l[1]}">${l[0]}</a>`).join('')}</article>`;
-  }).join('');
-  document.getElementById('scheduleBody').innerHTML = Array.from({length:60},(_,i)=>{const s=schedule[i%7];return `<tr><td>Dia ${i+1} — ${s[0]}</td><td>${s[1]}</td><td>${s[2]}</td><td>${s[3]}</td></tr>`}).join('');
-  document.getElementById('quizSubject').innerHTML = ['Todas',...subjects.map(s=>s.name)].map(s=>`<option value="${s}">${s}</option>`).join('');
-  const name=localStorage.getItem('studentName');
-  if(name){document.getElementById('studentName').value=name;document.getElementById('loginStatus').textContent=`Logada como ${name}`;}
+let currentQuiz = [];
+let currentIndex = 0;
+let answers = {};
+let lastResult = null;
+let chart;
+
+function getElement(id) {
+  return document.getElementById(id);
+}
+
+function init() {
+  const subjectsGrid = getElement('subjectsGrid');
+  const scheduleBody = getElement('scheduleBody');
+  const quizSubject = getElement('quizSubject');
+  const studentName = getElement('studentName');
+  const loginStatus = getElement('loginStatus');
+
+  if (subjectsGrid) {
+    subjectsGrid.innerHTML = subjects.map(subject => {
+      const count = questionBank.filter(question => question.s === subject.name).length;
+
+      return `
+        <article class="card">
+          <div class="card-top">
+            <h3>${subject.name}</h3>
+            <span class="badge">${count} questões</span>
+          </div>
+
+          <ul>
+            ${subject.topics.map(topic => `<li>${topic}</li>`).join('')}
+          </ul>
+
+          ${subject.links.map(link => `
+            <a class="resource" target="_blank" href="${link[1]}">${link[0]}</a>
+          `).join('')}
+        </article>
+      `;
+    }).join('');
+  }
+
+  if (scheduleBody) {
+    scheduleBody.innerHTML = Array.from({ length: 60 }, (_, index) => {
+      const item = schedule[index % 7];
+
+      return `
+        <tr>
+          <td>Dia ${index + 1} — ${item[0]}</td>
+          <td>${item[1]}</td>
+          <td>${item[2]}</td>
+          <td>${item[3]}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  if (quizSubject) {
+    quizSubject.innerHTML = ['Todas', ...subjects.map(subject => subject.name)]
+      .map(subject => `<option value="${subject}">${subject}</option>`)
+      .join('');
+  }
+
+  const savedName = localStorage.getItem('studentName');
+
+  if (savedName && studentName && loginStatus) {
+    studentName.value = savedName;
+    loginStatus.textContent = `Logada como ${savedName}`;
+  }
+
   updateChart();
 }
-function saveStudent(){const n=document.getElementById('studentName').value.trim();if(!n)return alert('Digite seu nome.');localStorage.setItem('studentName',n);document.getElementById('loginStatus').textContent=`Logada como ${n}`;}
-function startQuiz(){
-  const subj=document.getElementById('quizSubject').value;
-  const amount=Number(document.getElementById('quizAmount').value);
-  let pool=subj==='Todas'?[...questionBank]:[...questionBank.filter(q=>q.s===subj)];
-  currentQuiz=pool.sort(()=>Math.random()-.5).slice(0,amount);
-  currentIndex=0;answers={};lastResult=null;
-  document.getElementById('answerKey').innerHTML='';
+
+function saveStudent() {
+  const studentName = getElement('studentName');
+  const loginStatus = getElement('loginStatus');
+
+  if (!studentName) {
+    alert('Campo de nome não encontrado.');
+    return;
+  }
+
+  const name = studentName.value.trim();
+
+  if (!name) {
+    alert('Digite seu nome.');
+    return;
+  }
+
+  localStorage.setItem('studentName', name);
+
+  if (loginStatus) {
+    loginStatus.textContent = `Logada como ${name}`;
+  }
+}
+
+function startQuiz() {
+  const quizSubject = getElement('quizSubject');
+  const quizAmount = getElement('quizAmount');
+  const answerKey = getElement('answerKey');
+
+  const selectedSubject = quizSubject ? quizSubject.value : 'Todas';
+  const amount = quizAmount ? Number(quizAmount.value) : 10;
+
+  const pool = selectedSubject === 'Todas'
+    ? [...questionBank]
+    : questionBank.filter(question => question.s === selectedSubject);
+
+  currentQuiz = pool
+    .sort(() => Math.random() - 0.5)
+    .slice(0, amount);
+
+  currentIndex = 0;
+  answers = {};
+  lastResult = null;
+
+  if (answerKey) {
+    answerKey.innerHTML = '';
+  }
+
   renderQuestion();
 }
-function renderQuestion(){
-  if(!currentQuiz.length){document.getElementById('quizArea').innerHTML='<p>Escolha a disciplina e clique em Gerar Simulado.</p>';document.getElementById('questionCounter').textContent='Questão 0 de 0';return;}
-  const q=currentQuiz[currentIndex];
-  document.getElementById('questionCounter').textContent=`Questão ${currentIndex+1} de ${currentQuiz.length}`;
-  document.getElementById('quizArea').innerHTML=`<div class="question"><strong>${currentIndex+1}. ${q.s}</strong><p>${q.q}</p>${q.o.map((op,j)=>`<label class="option"><input type="radio" name="currentQuestion" value="${j}" ${answers[currentIndex]===j?'checked':''}> ${String.fromCharCode(65+j)}) ${op}</label>`).join('')}</div>`;
-  document.querySelectorAll('input[name="currentQuestion"]').forEach(input=>input.addEventListener('change',e=>{answers[currentIndex]=Number(e.target.value);}));
+
+function renderQuestion() {
+  const quizArea = getElement('quizArea');
+  const questionCounter = getElement('questionCounter');
+
+  if (!quizArea || !questionCounter) {
+    return;
+  }
+
+  if (!currentQuiz.length) {
+    quizArea.innerHTML = '<p>Escolha a disciplina e clique em Gerar Simulado.</p>';
+    questionCounter.textContent = 'Questão 0 de 0';
+    return;
+  }
+
+  const question = currentQuiz[currentIndex];
+
+  questionCounter.textContent = `Questão ${currentIndex + 1} de ${currentQuiz.length}`;
+
+  quizArea.innerHTML = `
+    <div class="question">
+      <strong>${currentIndex + 1}. ${question.s}</strong>
+
+      <p>${question.q}</p>
+
+      ${question.o.map((option, index) => `
+        <label class="option">
+          <input 
+            type="radio" 
+            name="currentQuestion" 
+            value="${index}" 
+            ${answers[currentIndex] === index ? 'checked' : ''}
+          >
+          ${String.fromCharCode(65 + index)}) ${option}
+        </label>
+      `).join('')}
+    </div>
+  `;
+
+  document.querySelectorAll('input[name="currentQuestion"]').forEach(input => {
+    input.addEventListener('change', event => {
+      answers[currentIndex] = Number(event.target.value);
+    });
+  });
 }
-function nextQuestion(){if(!currentQuiz.length)return;if(currentIndex<currentQuiz.length-1){currentIndex++;renderQuestion();}else{alert('Você chegou na última questão. Clique em Finalizar e Ver Gabarito.');}}
-function prevQuestion(){if(!currentQuiz.length)return;if(currentIndex>0){currentIndex--;renderQuestion();}}
-function finishQuiz(){
-  if(!currentQuiz.length)return alert('Gere um simulado primeiro.');
-  let correct=0,key='<h3>Gabarito final</h3><div class="key-grid">';
-  currentQuiz.forEach((q,i)=>{const val=answers[i]??-1;if(val===q.a)correct++;key+=`<p class="${val===q.a?'correct':'wrong'}"><b>${i+1}</b> ${q.s}<br>Correta: ${String.fromCharCode(65+q.a)} | Sua: ${val>=0?String.fromCharCode(65+val):'em branco'}</p>`;});
-  key+='</div>';
-  const total=currentQuiz.length, percent=Math.round((correct/total)*100), subj=document.getElementById('quizSubject').value;
-  lastResult={date:new Date().toLocaleString('pt-BR'),name:localStorage.getItem('studentName')||'Thayana',subject:subj,correct,total,percent};
-  document.getElementById('scorePercent').textContent=percent+'%';document.getElementById('scoreText').textContent=`${correct}/${total}`;document.getElementById('lastSubject').textContent=subj;document.getElementById('answerKey').innerHTML=key;location.href='#dashboard';
+
+function nextQuestion() {
+  if (!currentQuiz.length) {
+    return;
+  }
+
+  if (currentIndex < currentQuiz.length - 1) {
+    currentIndex++;
+    renderQuestion();
+    return;
+  }
+
+  alert('Você chegou na última questão. Clique em Finalizar e Ver Gabarito.');
 }
-function saveResultLocal(){if(!lastResult)return alert('Finalize um simulado primeiro.');const results=JSON.parse(localStorage.getItem('results')||'[]');results.push(lastResult);localStorage.setItem('results',JSON.stringify(results));updateChart();alert('Resultado salvo no navegador.');}
-async function sendToGoogleSheets(){if(!lastResult)return alert('Finalize um simulado primeiro.');if(!GOOGLE_SCRIPT_URL)return alert('Configure a URL do Apps Script no arquivo script.js.');try{await fetch(GOOGLE_SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastResult)});saveResultLocal();alert('Resultado enviado para a planilha.');}catch(e){alert('Não foi possível enviar. Verifique a URL do Apps Script.');}}
-function exportCSV(){const results=JSON.parse(localStorage.getItem('results')||'[]');if(!results.length)return alert('Nenhum resultado salvo.');const rows=[['Data','Nome','Disciplina','Acertos','Total','Percentual'],...results.map(r=>[r.date,r.name,r.subject,r.correct,r.total,r.percent])];const csv=rows.map(r=>r.join(';')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='resultados-metodo-thayana.csv';a.click();}
-function updateChart(){const results=JSON.parse(localStorage.getItem('results')||'[]');const labels=results.map(r=>r.date);const data=results.map(r=>r.percent);const ctx=document.getElementById('performanceChart');if(chart)chart.destroy();chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Acertividade %',data,tension:.35}]},options:{plugins:{legend:{labels:{color:'#f4fff4'}}},scales:{x:{ticks:{color:'#b6c9b6'}},y:{ticks:{color:'#b6c9b6'},beginAtZero:true,max:100}}}});}
+
+function prevQuestion() {
+  if (!currentQuiz.length) {
+    return;
+  }
+
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+function finishQuiz() {
+  if (!currentQuiz.length) {
+    alert('Gere um simulado primeiro.');
+    return;
+  }
+
+  let correct = 0;
+  let key = '<h3>Gabarito final</h3><div class="key-grid">';
+
+  currentQuiz.forEach((question, index) => {
+    const userAnswer = answers[index] ?? -1;
+    const isCorrect = userAnswer === question.a;
+
+    if (isCorrect) {
+      correct++;
+    }
+
+    key += `
+      <p class="${isCorrect ? 'correct' : 'wrong'}">
+        <b>${index + 1}</b> ${question.s}<br>
+        Correta: ${String.fromCharCode(65 + question.a)} |
+        Sua: ${userAnswer >= 0 ? String.fromCharCode(65 + userAnswer) : 'em branco'}
+      </p>
+    `;
+  });
+
+  key += '</div>';
+
+  const total = currentQuiz.length;
+  const percent = Math.round((correct / total) * 100);
+  const selectedSubject = getElement('quizSubject') ? getElement('quizSubject').value : 'Todas';
+
+  lastResult = {
+    date: new Date().toLocaleString('pt-BR'),
+    name: localStorage.getItem('studentName') || 'Thayana',
+    subject: selectedSubject,
+    correct,
+    total,
+    percent
+  };
+
+  const scorePercent = getElement('scorePercent');
+  const scoreText = getElement('scoreText');
+  const lastSubject = getElement('lastSubject');
+  const answerKey = getElement('answerKey');
+
+  if (scorePercent) {
+    scorePercent.textContent = `${percent}%`;
+  }
+
+  if (scoreText) {
+    scoreText.textContent = `${correct}/${total}`;
+  }
+
+  if (lastSubject) {
+    lastSubject.textContent = selectedSubject;
+  }
+
+  if (answerKey) {
+    answerKey.innerHTML = key;
+  }
+
+  location.href = '#dashboard';
+}
+
+function saveResultLocal(showAlert = true) {
+  if (!lastResult) {
+    alert('Finalize um simulado primeiro.');
+    return;
+  }
+
+  const results = JSON.parse(localStorage.getItem('results') || '[]');
+
+  const alreadyExists = results.some(result => {
+    return result.date === lastResult.date &&
+      result.subject === lastResult.subject &&
+      result.correct === lastResult.correct &&
+      result.total === lastResult.total;
+  });
+
+  if (!alreadyExists) {
+    results.push(lastResult);
+    localStorage.setItem('results', JSON.stringify(results));
+  }
+
+  updateChart();
+
+  if (showAlert) {
+    alert('Resultado salvo no navegador.');
+  }
+}
+
+async function sendToGoogleSheets() {
+  if (!lastResult) {
+    alert('Finalize um simulado primeiro.');
+    return;
+  }
+
+  if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.includes('/exec')) {
+    alert('URL inválida. Use a URL do Web App terminada em /exec.');
+    return;
+  }
+
+  const payload = {
+    date: lastResult.date,
+    name: lastResult.name,
+    subject: lastResult.subject,
+    correct: lastResult.correct,
+    total: lastResult.total,
+    percent: lastResult.percent
+  };
+
+  console.log('Enviando para Google Sheets:', payload);
+
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(payload)
+    });
+
+    saveResultLocal(false);
+
+    alert('Resultado enviado para a planilha! Atualize a planilha em alguns segundos.');
+  } catch (error) {
+    console.error('Erro ao enviar para Google Sheets:', error);
+    alert('Erro ao enviar. Abra F12 > Console para verificar.');
+  }
+}
+
+function exportCSV() {
+  const results = JSON.parse(localStorage.getItem('results') || '[]');
+
+  if (!results.length) {
+    alert('Nenhum resultado salvo.');
+    return;
+  }
+
+  const rows = [
+    ['Data', 'Nome', 'Disciplina', 'Acertos', 'Total', 'Percentual'],
+    ...results.map(result => [
+      result.date,
+      result.name,
+      result.subject,
+      result.correct,
+      result.total,
+      result.percent
+    ])
+  ];
+
+  const csv = rows.map(row => row.join(';')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+
+  link.href = URL.createObjectURL(blob);
+  link.download = 'resultados-metodo-thayana.csv';
+  link.click();
+}
+
+function updateChart() {
+  const performanceChart = getElement('performanceChart');
+
+  if (!performanceChart || typeof Chart === 'undefined') {
+    return;
+  }
+
+  const results = JSON.parse(localStorage.getItem('results') || '[]');
+  const labels = results.map(result => result.date);
+  const data = results.map(result => result.percent);
+
+  if (chart) {
+    chart.destroy();
+  }
+
+  chart = new Chart(performanceChart, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Acertividade %',
+          data,
+          tension: 0.35
+        }
+      ]
+    },
+    options: {
+      plugins: {
+        legend: {
+          labels: {
+            color: '#f4fff4'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#b6c9b6'
+          }
+        },
+        y: {
+          ticks: {
+            color: '#b6c9b6'
+          },
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+}
+
 init();
