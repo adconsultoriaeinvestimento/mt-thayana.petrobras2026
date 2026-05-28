@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Método de Estudo da Thayana — Petrobras 2026-2027</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav">
+      <div class="brand">Método Thayana <span>Petrobras</span></div>
+      <div class="links">
+        <a href="#disciplinas">Disciplinas</a>
+        <a href="#cronograma">Cronograma</a>
+        <a href="#simulado">Simulado</a>
+        <a href="#dashboard">Resultados</a>
+      </div>
+    </nav>
+    <section class="hero-content">
+      <p class="tag">Ênfase 16 • TI • Redes • Suporte • Infraestrutura</p>
+      <h1>Método de Estudo da Thayana<br><span>Petrobras 2026-2027</span></h1>
+      <p>Plataforma interativa com disciplinas, tópicos, videoaulas, cronograma de 60 dias e simulador com 50 questões por disciplina.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#simulado">Iniciar Simulado</a>
+        <a class="btn" href="#disciplinas">Ver Disciplinas</a>
+      </div>
+    </section>
+  </header>
+
+  <main>
+    <section class="login-card" id="login">
+      <h2>Login de Estudos</h2>
+      <p>Digite seu nome para salvar os resultados no navegador e enviar para sua planilha Google.</p>
+      <div class="form-row">
+        <input id="studentName" placeholder="Ex: Thayana Vilaça" />
+        <button onclick="saveStudent()">Entrar</button>
+      </div>
+      <small id="loginStatus"></small>
+    </section>
+
+    <section id="disciplinas" class="section">
+      <div class="section-title">
+        <p>Conteúdo por disciplina</p>
+        <h2>Disciplinas, tópicos, videoaulas e quantidade de questões</h2>
+      </div>
+      <div id="subjectsGrid" class="grid"></div>
+    </section>
+
+    <section id="cronograma" class="section panel">
+      <div class="section-title">
+        <p>Plano de 60 dias</p>
+        <h2>Cronograma diário — 2 horas por dia</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dia</th><th>Foco</th><th>1ª hora</th><th>2ª hora</th></tr></thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="simulado" class="section">
+      <div class="section-title">
+        <p>Simulador online</p>
+        <h2>50 questões por disciplina, seta para próxima e gabarito final</h2>
+      </div>
+      <div class="simulator-layout">
+        <aside class="filter-box">
+          <h3>Configuração</h3>
+          <label>Disciplina</label>
+          <select id="quizSubject"></select>
+          <label>Quantidade</label>
+          <select id="quizAmount">
+            <option value="10">10 questões</option>
+            <option value="20">20 questões</option>
+            <option value="30">30 questões</option>
+            <option value="50" selected>50 questões</option>
+          </select>
+          <button onclick="startQuiz()" class="btn primary full">Gerar Simulado</button>
+          <button onclick="finishQuiz()" class="btn full">Finalizar e Ver Gabarito</button>
+          <p class="mini" id="questionCounter">Questão 0 de 0</p>
+        </aside>
+        <div class="quiz-card">
+          <div id="quizArea" class="quiz-area"><p>Escolha a disciplina e clique em Gerar Simulado.</p></div>
+          <div class="quiz-nav">
+            <button onclick="prevQuestion()" class="btn">← Anterior</button>
+            <button onclick="nextQuestion()" class="btn primary">Ver mais / Próxima →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboard" class="section panel">
+      <div class="section-title">
+        <p>Desempenho</p>
+        <h2>Gabarito, acertividade e histórico</h2>
+      </div>
+      <div class="result-cards">
+        <div class="stat"><span id="scorePercent">0%</span><p>Acertividade</p></div>
+        <div class="stat"><span id="scoreText">0/0</span><p>Acertos</p></div>
+        <div class="stat"><span id="lastSubject">-</span><p>Última disciplina</p></div>
+      </div>
+      <div id="answerKey" class="answer-key"></div>
+      <div class="actions">
+        <button onclick="saveResultLocal()" class="btn primary">Salvar resultado local</button>
+        <button onclick="sendToGoogleSheets()" class="btn">Enviar para planilha online</button>
+        <button onclick="exportCSV()" class="btn">Baixar CSV/Excel</button>
+      </div>
+      <canvas id="performanceChart" height="110"></canvas>
+      <p class="note">Para enviar para a planilha Google, cole a URL do Apps Script no campo <strong>GOOGLE_SCRIPT_URL</strong> dentro do arquivo script.js.</p>
+    </section>
+  </main>
+
+  <footer><p>Método de Estudo da Thayana — Petrobras 2026-2027 • Ênfase 16</p></footer>
+  <script src="script.js"></script>
+</body>
+</html>

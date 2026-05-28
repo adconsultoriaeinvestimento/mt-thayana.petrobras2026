@@ -1,0 +1,20 @@
+PASSO PARA SALVAR NA PLANILHA GOOGLE:
+
+1. Abra sua planilha Google.
+2. Vá em Extensões > Apps Script.
+3. Cole o código abaixo.
+4. Clique em Implantar > Nova implantação > Aplicativo da Web.
+5. Em “Quem pode acessar”, selecione “Qualquer pessoa”.
+6. Copie a URL gerada e cole no arquivo script.js na variável GOOGLE_SCRIPT_URL.
+
+CÓDIGO:
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Resultados') || SpreadsheetApp.getActiveSpreadsheet().insertSheet('Resultados');
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(['Data', 'Nome', 'Disciplina', 'Acertos', 'Total', 'Acertividade']);
+  }
+  const data = JSON.parse(e.postData.contents);
+  sheet.appendRow([data.date, data.name, data.subject, data.correct, data.total, data.percent + '%']);
+  return ContentService.createTextOutput(JSON.stringify({status:'ok'})).setMimeType(ContentService.MimeType.JSON);
+}
