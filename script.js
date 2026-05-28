@@ -1,6 +1,7 @@
 // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
 const GOOGLE_SCRIPT_URL = '';
-const GOOGLE_SHEET_LINK = 'https://docs.google.com/spreadsheets/d/1GbX2BC9KPjI2hVt-3ZxPMOB7aSADXX8gJ7NA5rniD-U/edit?usp=sharing';
+const GOOGLE_SHEET_LINK = 'https://script.google.com/macros/s/AKfycbw3ZnmhyJnMjwKezh_gtfGsp2iOlxlCrDP5MbLPiSIObR81dtso-fs6_jjlB3S4YvwJ/exec';
+
 
 const subjects = [
   {name:'Português Cesgranrio',topics:['Interpretação de texto','Concordância verbal e nominal','Crase','Pontuação','Regência verbal e nominal','Verbos','Coesão e coerência','Reescrita de frases'],links:[['Português Cesgranrio Petrobras','https://www.youtube.com/results?search_query=portugues+cesgranrio+petrobras'],['Questões Cesgranrio','https://www.qconcursos.com/questoes-de-concursos/bancas/cesgranrio']]},
