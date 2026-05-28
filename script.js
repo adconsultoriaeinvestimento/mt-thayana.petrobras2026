@@ -1,10 +1,7 @@
-ATUAL: 
 
  // COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT WEB APP
 const GOOGLE_SHEET_LINK = 'https://docs.google.com/spreadsheets/d/1GbX2BC9KPjI2hVt-3ZxPMOB7aSADXX8gJ7NA5rniD-U/edit?usp=sharing';
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrYfXv_IhDTqqS_wdEDmF0Aekk_NsZC8Fegv2PzOI0eiByXGFygBHcE1S84KEIWZfc/exec';
-
-
 
 
 const subjects = [
